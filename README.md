@@ -1,124 +1,75 @@
-# Steps need to do
-
-This is a sample e-commerce application built for learning purposes.
-
-Here's how to deploy it on CentOS systems:
-
-## Deploy Pre-Requisites
-
-1. Install FirewallD
-
+### Deploy a complete php and mysql website by shell script
+### Install MariaDB
+```sh
+sudo apt  install -y mariadb-server
+systemctl status mariadb
 ```
-sudo yum install -y firewalld
-sudo service firewalld start
-sudo systemctl enable firewalld
+### Configure Database by command
+Login to mysql 
+```sh
+sudo mysql
 ```
-
-## Deploy and Configure Database
-
-1. Install MariaDB
-
+Then run the following command
+```sh
+CREATE DATABASE ecomdb;
 ```
-sudo yum install -y mariadb-server
-sudo vi /etc/my.cnf
-sudo service mariadb start
-sudo systemctl enable mariadb
+```sh
+CREATE USER 'ecomuser'@'localhost' IDENTIFIED BY 'ecompassword';
 ```
-
-2. Configure firewall for Database
-
+```sh
+GRANT ALL PRIVILEGES ON *.* TO 'ecomuser'@'localhost';
 ```
-sudo firewall-cmd --permanent --zone=public --add-port=3306/tcp
-sudo firewall-cmd --reload
+```sh
+ FLUSH PRIVILEGES;
 ```
-
-3. Configure Database
-
+```sh
+exit
 ```
-$ mysql
-MariaDB > CREATE DATABASE ecomdb;
-MariaDB > CREATE USER 'ecomuser'@'localhost' IDENTIFIED BY 'ecompassword';
-MariaDB > GRANT ALL PRIVILEGES ON *.* TO 'ecomuser'@'localhost';
-MariaDB > FLUSH PRIVILEGES;
+## Configure databse by script
+```sh
+cat > configure-db.sql <<-EOF
+CREATE DATABASE ecomdb;
+CREATE USER 'ecomuser'@'localhost' IDENTIFIED BY 'ecompassword';
+GRANT ALL PRIVILEGES ON *.* TO 'ecomuser'@'localhost';
+FLUSH PRIVILEGES;
+EOF
+```
+### Instert this file to mysql
+```sh
+sudo mysql < configure-db.sql
 ```
 
-> ON a multi-node setup remember to provide the IP address of the web server here: `'ecomuser'@'web-server-ip'`
-
-4. Load Product Inventory Information to database
-
-Create the db-load-script.sql
-
-```
+### Create the db-load-script.sql
+```sh
 cat > db-load-script.sql <<-EOF
 USE ecomdb;
 CREATE TABLE products (id mediumint(8) unsigned NOT NULL auto_increment,Name varchar(255) default NULL,Price varchar(255) default NULL, ImageUrl varchar(255) default NULL,PRIMARY KEY (id)) AUTO_INCREMENT=1;
 
-INSERT INTO products (Name,Price,ImageUrl) VALUES ("Laptop","100","c-1.png"),("Drone","200","c-2.png"),("VR","300","c-3.png"),("Tablet","50","c-5.png"),("Watch","90","c-6.png"),("Phone Covers","20","c-7.png"),("Phone","80","c-8.png"),("Laptop","150","c-4.png");
+INSERT INTO products (Name,Price,ImageUrl) VALUES ("Apple","100","c-1.png"),("Orange","200","c-2.png"),("Lemon","300","c-3.png"),("Potato","50","c-5.png"),("Fish","90","c-6.png"),("Chicken","20","c-7.png"),("Beef","80","c-8.png"),("Apple","150","c-4.png");
 
 EOF
 ```
-
-Run sql script
-
+### Instert the file to mysql
+```sh
+sudo mysql < db-load-script.sql
 ```
 
-mysql < db-load-script.sql
+### Install required packages 
+```sh
+sudo apt  install -y apache2 php php-mysql
 ```
-
-
-## Deploy and Configure Web
-
-1. Install required packages
-
+### Delete the /var/www/html folder and clone the code to /var/www//html
+```sh
+sudo rm -fr /var/www/html/
+sudo git clone https://github.com/rajivsiddiqui/project-7-shell-script.git /var/www/html
 ```
-sudo yum install -y httpd php php-mysql
-sudo firewall-cmd --permanent --zone=public --add-port=80/tcp
-sudo firewall-cmd --reload
-```
-
-2. Configure httpd
-
-Change `DirectoryIndex index.html` to `DirectoryIndex index.php` to make the php page the default page
-
-```
-sudo sed -i 's/index.html/index.php/g' /etc/httpd/conf/httpd.conf
-```
-
-3. Start httpd
-
-```
-sudo service httpd start
-sudo systemctl enable httpd
-```
-
-4. Download code
-
-```
-sudo yum install -y git
-git clone https://github.com/kodekloudhub/learning-app-ecommerce.git /var/www/html/
-```
-
-5. Update index.php
-
-Update [index.php](https://github.com/kodekloudhub/learning-app-ecommerce/blob/13b6e9ddc867eff30368c7e4f013164a85e2dccb/index.php#L107) file to connect to the right database server. In this case `localhost` since the database is on the same server.
-
-```
-sudo sed -i 's/172.20.1.101/localhost/g' /var/www/html/index.php
-
-              <?php
-                        $link = mysqli_connect('172.20.1.101', 'ecomuser', 'ecompassword', 'ecomdb');
-                        if ($link) {
-                        $res = mysqli_query($link, "select * from products;");
-                        while ($row = mysqli_fetch_assoc($res)) { ?>
-```
-
-> ON a multi-node setup remember to provide the IP address of the database server here.
-```
-sudo sed -i 's/172.20.1.101/localhost/g' /var/www/html/index.php
-```
-
-6. Test
-
-```
+                 
+### Browse the website
+```sh
 curl http://localhost
 ```
+
+
+
+
+
