@@ -55,7 +55,7 @@
                             <span class="icon-bar"></span>
                             </button>
                             <a class="navbar-brand" href="index.html">
-                                <img src="img/logo.png" alt="">
+                                <img src="img/logo-5.png" alt="">
                                 <img src="img/logo-5.png" alt="">
                             </a>
                         </div>
@@ -104,7 +104,7 @@
             <div class="row it_works">
               <?php
 
-                        $link = mysqli_connect('172.20.1.101', 'ecomuser', 'ecompassword', 'ecomdb');
+                        $link = mysqli_connect('localhost', 'ecomuser', 'ecompassword', 'ecomdb');
 
                         if ($link) {
                         $res = mysqli_query($link, "select * from products;");
